@@ -1,3 +1,33 @@
+import pygame
+from os import getcwd
+pygame.init()
+
+gameFont = pygame.font.Font(None, 25)
+SCREEN_WIDTH,SCREEN_HEIGHT = 1000,700
+pygame.display.set_caption("MBM Hackathon Group 2 project")
+screen = pygame.display.set_mode((SCREEN_WIDTH,SCREEN_HEIGHT))
+clock = pygame.time.Clock()
+
+interval = 3000
+previousTime = pygame.time.get_ticks()
+#Starting Resources
+energyCount = 15
+waterCount = 15
+foodCount = 15
+money = 500
+population = 10
+pollution = 3
+
+#Starting Buildings
+numFarms = 0
+numWindmills = 0
+numCoalplants = 0
+numStores = 0
+numParks = 0
+numFactories = 0
+numLakes = 0
+numHousing = 0
+
 class Button:
     def __init__(self,xPos:int,yPos:int,text:str,textColor,buttonColor,colorOnClick,borderColor,width:int,height:int):
         self.xPos = xPos
@@ -62,20 +92,21 @@ class ResourceCounter:
         self.text = inputText
         self.drawSelf()
 
+
 waterIcon = ResourceCounter("Water: "+str(waterCount),"white",getcwd() + '\\' + 'water.png',(46,20),15,"white",True,"blue",110,30,"blue")
 foodIcon = ResourceCounter("Food: "+str(foodCount),"white",getcwd() + '\\' + 'water.png',(208,20),15,"white",True,"blue",110,30,"blue")
 moneyIcon = ResourceCounter("Money: "+str(money),"white",getcwd() + '\\' + 'water.png',(370,20),15,"white",True,"blue",110,30,"blue")
 energyIcon = ResourceCounter("Energy: "+str(energyCount),"white",getcwd() + '\\' + 'water.png',(532,20),15,"white",True,"blue",110,30,"blue")
 populationIcon = ResourceCounter("Pop: "+str(population),"white",getcwd() + '\\' + 'water.png',(694,20),15,"white",True,"blue",110,30,"blue")
 pollutionIcon = ResourceCounter("Pollution: "+str(pollution),"white",getcwd() + '\\' + 'water.png',(856,20),15,"white",True,"blue",110,30,"blue")
-buyFarmButton = Button(50,50,"Buy Farm","white","#007BFF","#0056b3","#003d7a",150,30)
-buyWindmillButton = Button(50,125,"Buy Windmill","white","#007BFF","#0056b3","#003d7a",150,30)
-buyCoalPlantButton = Button(50,200,"Buy Coal Plant","white","#007BFF","#0056b3","#003d7a",150,30)
-buyStoreButton = Button(50,275,"Buy Store","white","#007BFF","#0056b3","#003d7a",150,30)
-buyParkButton = Button(50,350,"Buy Park","white","#007BFF","#0056b3","#003d7a",150,30)
-buyFactoryButton = Button(50,425,"Buy Factory","white","#007BFF","#0056b3","#003d7a",150,30)
-buyLakeButton = Button(50,500,"Buy Lake","white","#007BFF","#0056b3","#003d7a",150,30)
-buyHousingButton = Button(50,575,"Buy Housing","white","#007BFF","#0056b3","#003d7a",150,30)
+buyFarmButton = Button(50,100,"Buy Farm","white","#007BFF","#0056b3","#003d7a",150,30)
+buyWindmillButton = Button(50,175,"Buy Windmill","white","#007BFF","#0056b3","#003d7a",150,30)
+buyCoalPlantButton = Button(50,250,"Buy Coal Plant","white","#007BFF","#0056b3","#003d7a",150,30)
+buyStoreButton = Button(50,325,"Buy Store","white","#007BFF","#0056b3","#003d7a",150,30)
+buyParkButton = Button(50,400,"Buy Park","white","#007BFF","#0056b3","#003d7a",150,30)
+buyFactoryButton = Button(50,475,"Buy Factory","white","#007BFF","#0056b3","#003d7a",150,30)
+buyLakeButton = Button(50,550,"Buy Lake","white","#007BFF","#0056b3","#003d7a",150,30)
+buyHousingButton = Button(50,625,"Buy Housing","white","#007BFF","#0056b3","#003d7a",150,30)
 
 toRun = True
 while toRun:
@@ -121,11 +152,29 @@ while toRun:
     currentTime = pygame.time.get_ticks()
     if currentTime - previousTime >= interval:
         #Population consumption - to Add
-        energyCount += numCoalplants*30 + numWindmills*20 - (numFarms*5 + numStores*10 + numParks*3 + numFactories*10 + numLakes +numHousing*10)
-        waterCount += numLakes*30 - (numFarms*10 + numStores*3 + numFactories*10 + numHousing*10)
-        foodCount += numFarms*30 - (numStores*20 + numParks + numFactories*10 +numHousing*10)
-        money += numFactories*15 + numStores*5 - (numFarms*2 + numWindmills + numCoalplants + numParks + numLakes + numHousing*2)
-    
+        energyCount += numCoalplants*30 + numWindmills*20 - (numFarms*5 + numStores*10 + numParks*3 + numFactories*10 + numLakes + numHousing*10 + (population - population%20)/20)
+        waterCount += numLakes*30 - (numFarms*10 + numStores*3 + numFactories*10 + numHousing*10 + (population - population%20)/20)
+        foodCount += numFarms*30 - (numStores*20 + numParks + numFactories*10 +numHousing*10 + (population - population%20)/20)
+        money += numFactories*15 + numStores*5 - (numFarms*2 + numWindmills + numCoalplants + numParks + numLakes + numHousing*2 + (population - population%20)/20)
+        popDesire = (energyCount - energyCount%500)/500
+        if energyCount < 0:
+            popDesire -= 1
+        elif energyCount < -300:
+            popDesire -= 5
+        if waterCount < 0:
+            popDesire -= 1
+        elif waterCount < -300:
+            popDesire -= 5
+        if foodCount < 0:
+            popDesire -= 1
+        elif foodCount < -300:
+            popDesire -= 5
+        if money < 0:
+            popDesire -= 1
+        elif money < -300:
+            popDesire -= 5 
+        population += popDesire + numHousing*5 + numFarms*2 + numStores +numParks - (numFactories*3 + (population - pollution%10)/10)
+        pollution += numFarms + numStores + numCoalplants*5 + numFactories*3 - (numParks*2)
         previousTime = currentTime
 
     waterIcon.updateText("Water: "+str(waterCount))
@@ -134,7 +183,7 @@ while toRun:
     energyIcon.updateText("Energy: "+str(energyCount))
     populationIcon.updateText("Pop: "+str(population))
     pollutionIcon.updateText("Pollution: "+str(pollution))
-    buyFarmButton.drawSelf
+    buyFarmButton.drawSelf()
     buyWindmillButton.drawSelf()
     buyCoalPlantButton.drawSelf()
     buyStoreButton.drawSelf()
